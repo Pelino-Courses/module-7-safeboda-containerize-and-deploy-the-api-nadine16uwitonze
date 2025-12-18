@@ -1,9 +1,10 @@
 name: CI/CD Pipeline
 
 on:
-  push:
-    branches:
-      - main
+  # DISABLED - Using main-dockerhub.yml instead
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch: # Allows manual triggering
 
 env:
