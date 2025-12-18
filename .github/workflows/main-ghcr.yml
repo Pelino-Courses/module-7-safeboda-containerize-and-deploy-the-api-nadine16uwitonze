@@ -1,19 +1,20 @@
-name: CI/CD Pipeline (Docker Hub)
+name: CI/CD Pipeline (GitHub Container Registry)
 
-# Alternative workflow using Docker Hub instead of Azure Container Registry
-# This is simpler but requires a Docker Hub account
+# Using GitHub Container Registry (ghcr.io) - No Docker Hub account needed!
+# This is free, integrated with GitHub, and works automatically
 
 on:
-  # DISABLED - Using main-ghcr.yml (GitHub Container Registry) instead
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch: # Allows manual triggering
 
 env:
   AZURE_WEBAPP_NAME: safeboda-api    # Set this to your Azure App Service name
   AZURE_RESOURCE_GROUP: safeboda-rg  # Set this to your Azure Resource Group name
   DOCKER_IMAGE_NAME: safeboda-api
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/safeboda-api
   DOTNET_VERSION: '8.0.x'
 
 jobs:
@@ -48,6 +49,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-test
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
     
     steps:
       - name: Checkout code
@@ -56,11 +60,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -69,8 +74,8 @@ jobs:
           file: ./SafeBoda.Api/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
   deploy-to-azure:
     runs-on: ubuntu-latest
@@ -92,9 +97,5 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-          images: ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-
-
-
-
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
