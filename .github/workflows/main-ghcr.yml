@@ -7,11 +7,11 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: safeboda-api    # Set this to your Azure App Service name
-  AZURE_RESOURCE_GROUP: safeboda-rg  # Set this to your Azure Resource Group name
+  AZURE_WEBAPP_NAME: safeboda-api
+  AZURE_RESOURCE_GROUP: safeboda-rg
   DOCKER_IMAGE_NAME: safeboda-api
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/safeboda-api
@@ -98,4 +98,5 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
 

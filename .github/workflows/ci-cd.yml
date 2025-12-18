@@ -1,9 +1,7 @@
 ﻿name: CI/CD Pipeline
 
 on:
-  # DISABLED - Using main-dockerhub.yml instead
-  # push:
-  #   branches: [ main ]
+
   workflow_dispatch: {}
 
 jobs:
