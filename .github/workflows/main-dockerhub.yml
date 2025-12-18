@@ -13,7 +13,6 @@ env:
   AZURE_WEBAPP_NAME: safeboda-api    # Set this to your Azure App Service name
   AZURE_RESOURCE_GROUP: safeboda-rg  # Set this to your Azure Resource Group name
   DOCKER_IMAGE_NAME: safeboda-api
-  DOCKER_USERNAME: your-dockerhub-username  # Replace with your Docker Hub username
   DOTNET_VERSION: '8.0.x'
 
 jobs:
@@ -69,8 +68,8 @@ jobs:
           file: ./SafeBoda.Api/Dockerfile
           push: true
           tags: |
-            ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-            ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
 
   deploy-to-azure:
     runs-on: ubuntu-latest
@@ -92,5 +91,9 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-          images: ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          images: ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+
+
+
+
 
