@@ -1,22 +1,21 @@
 name: CI/CD Pipeline
 
 on:
-  # DISABLED - Using main-dockerhub.yml instead
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch: # Allows manual triggering
 
 env:
-  AZURE_WEBAPP_NAME: safeboda-api    # Set this to your Azure App Service name
-  AZURE_RESOURCE_GROUP: safeboda-rg  # Set this to your Azure Resource Group name
+  AZURE_WEBAPP_NAME: safeboda-api
+  AZURE_RESOURCE_GROUP: safeboda-rg
   DOCKER_IMAGE_NAME: safeboda-api
   DOTNET_VERSION: '8.0.x'
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,13 +38,13 @@ jobs:
           else
             echo "Test project not found, skipping tests"
           fi
-        continue-on-error: true # Continue even if tests fail (remove this in production)
+        continue-on-error: true
 
   build-and-push-docker:
     runs-on: ubuntu-latest
     needs: build-and-test
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -67,8 +66,8 @@ jobs:
           file: ./SafeBoda.Api/Dockerfile
           push: true
           tags: |
-            ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-            ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+            ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/pelino-courses/${{ env.DOCKER_IMAGE_NAME }}:latest
+            ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/pelino-courses/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
 
   deploy-to-azure:
     runs-on: ubuntu-latest
@@ -90,5 +89,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-          images: ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-
+          images: ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/pelino-courses/${{ env.DOCKER_IMAGE_NAME }}:latest
