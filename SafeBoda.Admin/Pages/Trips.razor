@@ -1,0 +1,61 @@
+@page "/trips"
+<link href="css/Table.css" rel="stylesheet" />
+
+@using SafeBoda.Admin.Models
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+<h3>Trips</h3>
+
+@if (trips == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!trips.Any())
+{
+    <p><em>No trips found.</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Rider</th>
+            <th>Driver</th>
+            <th>Amount</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var trip in trips)
+        {
+            <tr>
+                <td>@trip.Id</td>
+                <td>@trip.RiderId</td>
+                <td>@trip.DriverId</td>
+                <td>@trip.Amount</td>
+                <td>@trip.Status</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<TripDto>? trips;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            trips = await Http.GetFromJsonAsync<List<TripDto>>("api/trips");
+        }
+        catch (Exception ex)
+        {
+          
+            trips = new List<TripDto>();
+            Console.WriteLine($"Error fetching trips: {ex.Message}");
+        }
+    }
+}

@@ -1,0 +1,67 @@
+﻿/* Home.css */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+    padding: 0;
+}
+
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* full viewport height */
+    text-align: center;
+}
+
+.home-title {
+    font-size: 3rem;
+    color: #1f2937;
+    margin-bottom: 1rem;
+}
+
+.home-subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    margin-bottom: 3rem;
+}
+
+.home-buttons {
+    display: flex;
+    gap: 2rem;
+}
+
+.btn {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-login {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+}
+
+.btn-login:hover {
+    background-color: #1d4ed8;
+}
+
+.btn-register {
+    background-color: #f3f4f6;
+    color: #1f2937;
+    border: 1px solid #d1d5db;
+}
+
+.btn-register:hover {
+    background-color: #e5e7eb;
+}

@@ -1,0 +1,21 @@
+bin/
+obj/
+*.db
+*.db-shm
+*.db-wal
+.vs/
+.git/
+*.user
+**/node_modules/
+**/bin/
+**/obj/
+*.suo
+*.userosscache
+
+# Logs
+*.log
+
+
+
+
+

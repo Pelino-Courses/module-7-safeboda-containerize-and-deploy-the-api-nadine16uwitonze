@@ -1,0 +1,21 @@
+﻿@page "/"
+@using System.ComponentModel.DataAnnotations
+@layout SafeBoda.Admin.Shared.EmptyLayout
+<link href="css/Home.css" rel="stylesheet" />
+
+<div class="home-container">
+    <h1 class="home-title">Welcome to SafeBoda Admin</h1>
+    <p class="home-subtitle">Manage Riders, Drivers, and Trips efficiently.</p>
+
+    <div class="home-buttons">
+        <button class="btn btn-login" @onclick="NavigateToLogin">Login</button>
+        <button class="btn btn-register" @onclick="NavigateToRegister">Register</button>
+    </div>
+</div>
+
+@code {
+    [Inject, Required] private NavigationManager Nav { get; set; } = null!;
+
+    private void NavigateToLogin() => Nav.NavigateTo("/login");
+    private void NavigateToRegister() => Nav.NavigateTo("/register");
+}

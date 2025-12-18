@@ -1,0 +1,30 @@
+@page "/login"
+@using System.ComponentModel.DataAnnotations
+@layout SafeBoda.Admin.Shared.EmptyLayout
+<link href="css/Auth.css" rel="stylesheet" />
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Login</h1>
+        <p class="auth-subtitle">Enter your credentials to access the dashboard</p>
+
+        <input class="auth-input" @bind="email" type="email" placeholder="Email" />
+        <input class="auth-input" @bind="password" type="password" placeholder="Password" />
+
+        <button class="auth-button" @onclick="LoginUser">Login</button>
+
+        <a href="/register" class="auth-link">Don't have an account? Register</a>
+    </div>
+</div>
+
+@code {
+    [Inject, Required] private NavigationManager Nav { get; set; } = null!;
+
+    private string email = "";
+    private string password = "";
+
+    private void LoginUser()
+    {
+        Nav.NavigateTo("/dashboard");
+    }
+}

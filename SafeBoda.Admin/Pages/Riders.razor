@@ -1,0 +1,52 @@
+﻿@page "/riders"
+<link href="css/Table.css" rel="stylesheet" />
+
+@using SafeBoda.Application.DTOs
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+
+<h3>Riders</h3>
+
+@if (riders == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!riders.Any())
+{
+    <p><em>No riders found.</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Email</th>
+           
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var rider in riders)
+        {
+            <tr>
+                <td>@rider.Id</td>
+                <td>@rider.Name</td>
+                <td>@rider.Email</td>
+                
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<RiderDto>? riders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+        riders = await Http.GetFromJsonAsync<List<RiderDto>>("api/riders");
+    }
+}

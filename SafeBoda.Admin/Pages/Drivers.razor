@@ -1,0 +1,60 @@
+﻿@page "/drivers"
+<link href="css/Table.css" rel="stylesheet" />
+
+@using SafeBoda.Admin.Services
+@using SafeBoda.Admin.Models
+@inject ApiClient Api
+@using SafeBoda.Application.DTOs
+
+
+<h3 class="text-xl font-bold mb-4">Drivers</h3>
+
+
+@if (drivers == null)
+{
+    <p>Loading...</p>
+}
+else if (drivers.Count == 0)
+{
+    <p>No drivers found.</p>
+}
+else
+{
+    <table class="table-auto w-full border">
+        <thead>
+        <tr class="bg-gray-200">
+            <th class="border px-2">ID</th>
+            <th class="border px-2">Name</th>
+            <th class="border px-2">VehicleNumber</th>
+            <th class="border px-2">VehicleType</th>
+            <th class="border px-2">LicenseNumber</th>
+            <th class="border px-2">PhoneNumber</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var d in drivers)
+        {
+            <tr>
+                <td class="border px-2">@d.Id</td>
+                <td class="border px-2">@d.Name</td>
+                <td class="border px-2">@d.VehicleNumber</td>
+                <td class="border px-2">@d.VehicleType</td>
+                <td class="border px-2">@d.LicenseNumber</td>
+                <td class="border px-2">@d.PhoneNumber</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private List<DriverDto> drivers = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        drivers = await Api.GetDriversAsync();
+    }
+}
+    

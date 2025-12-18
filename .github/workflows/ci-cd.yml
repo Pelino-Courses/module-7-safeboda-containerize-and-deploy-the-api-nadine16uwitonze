@@ -1,0 +1,52 @@
+﻿name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore
+        run: dotnet restore SafeBoda.sln
+      - name: Build
+        run: dotnet build SafeBoda.sln --configuration Release --no-restore
+      - name: Test
+        run: |
+          dotnet test SafeBoda.Api.Tests/SafeBoda.Api.Tests.csproj --configuration Release --no-build --verbosity normal
+
+  build-push-deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: ${{ github.repository }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and push image to ACR
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          tags: ${{ secrets.ACR_LOGIN_SERVER }}/safeboda-api:${{ github.sha }}
+
+      - name: Deploy to Azure Web App for Containers
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          slot-name: Production
+          images: ${{ secrets.ACR_LOGIN_SERVER }}/safeboda-api:${{ github.sha }}
+

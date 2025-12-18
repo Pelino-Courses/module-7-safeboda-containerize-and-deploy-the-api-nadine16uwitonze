@@ -1,0 +1,71 @@
+﻿@page "/dashboard"
+@using SafeBoda.Admin.Services
+@using SafeBoda.Admin.Models
+@inject ApiClient Api
+@inject NavigationManager Nav
+@using SafeBoda.Application.DTOs
+
+
+<h2 class="text-2xl font-bold mb-6">Dashboard</h2>
+
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+
+    <div class="p-4 bg-white shadow rounded">
+        <h3 class="text-lg font-semibold">Active Trips</h3>
+        <p class="text-3xl font-bold">@activeTrips</p>
+    </div>
+
+
+    <div class="p-4 bg-white shadow rounded">
+        <h3 class="text-lg font-semibold">Drivers</h3>
+        <p class="text-3xl font-bold">@driversCount</p>
+    </div>
+
+
+    <div class="p-4 bg-white shadow rounded">
+        <h3 class="text-lg font-semibold">Riders</h3>
+        <p class="text-3xl font-bold">@ridersCount</p>
+    </div>
+
+
+</div>
+
+<div class="mt-8">
+    <button class="bg-blue-500 text-black px-4 py-2 rounded mr-2"
+            @onclick='() => Nav.NavigateTo("/trips")'>
+        View Trips
+    </button>
+
+    <button class="bg-green-500 text-black px-4 py-2 rounded mr-2"
+            @onclick='() => Nav.NavigateTo("/drivers")'>
+        View Drivers
+    </button>
+
+    <button class="bg-purple-500 text-black px-4 py-2 rounded"
+            @onclick='() => Nav.NavigateTo("/riders")'>
+        View Riders
+    </button>
+</div>
+
+
+
+@code {
+    private int activeTrips;
+    private int driversCount;
+    private int ridersCount;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var trips = await Api.GetActiveTripsAsync();
+        var drivers = await Api.GetDriversAsync();
+        var riders = await Api.GetAsync<List<RiderDto>>("api/riders") ?? new();
+
+
+        activeTrips = trips.Count;
+        driversCount = drivers.Count;
+        ridersCount = riders.Count;
+    }
+}
