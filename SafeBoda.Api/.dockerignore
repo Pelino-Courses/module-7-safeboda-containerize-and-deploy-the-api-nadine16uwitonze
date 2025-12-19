@@ -1,4 +1,20 @@
-﻿bin/
+﻿# Ignore build outputs and local files
+bin/
+obj/
+.vs/
+.user
+*.user
+*.suo
+*.log
+node_modules/
+.git/
+
+# NuGet packages
+**/packages/*
+
+# Dockerfile-related
+Dockerfile*
+bin/
 obj/
 *.db
 *.db-shm

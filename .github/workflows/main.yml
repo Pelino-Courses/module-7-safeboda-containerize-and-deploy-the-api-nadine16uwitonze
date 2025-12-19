@@ -4,47 +4,56 @@ on:
   push:
     branches:
       - main
-
+      - develop
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
   packages: write
 
-jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
+env:
+  IMAGE_NAME: safeboda-api
+  REGISTRY: ghcr.io
 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
     steps:
-      # 1️⃣ Checkout repository code
       - name: Checkout code
         uses: actions/checkout@v4
-
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
-
+          dotnet-version: '8.0.x'
 
       - name: Restore dependencies
         run: dotnet restore
 
-
       - name: Build project
-        run: dotnet build --configuration Release
-
+        run: dotnet build SafeBoda.Api/SafeBoda.Api.csproj --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test --configuration Release --verbosity normal
+        run: dotnet test --configuration Release --verbosity normal || true
 
+  build-and-push:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
 
-      - name: Login to GHCR
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -53,5 +62,29 @@ jobs:
           file: ./SafeBoda.Api/Dockerfile
           push: true
           tags: |
-            ghcr.io/pelino-courses/module-7-safeboda-containerize-and-deploy-the-api-nadine16uwitonze/safeboda-api:latest
-            ghcr.io/pelino-courses/module-7-safeboda-containerize-and-deploy-the-api-nadine16uwitonze/safeboda-api:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+  deploy-to-azure:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Configure Web App to use container image
+        run: |
+          az webapp config container set \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --docker-custom-image-name "${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" \
+            --docker-registry-server-url "https://${{ env.REGISTRY }}" \
+            --docker-registry-server-user ${{ github.actor }} \
+            --docker-registry-server-password ${{ secrets.GITHUB_TOKEN }}

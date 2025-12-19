@@ -1,12 +1,10 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+﻿# Multi-stage Dockerfile for SafeBoda API (built for .NET 8)
+# Build from repository root: docker build -f SafeBoda.Api/Dockerfile -t safeboda-api .
 
-# All paths in COPY are relative to the Docker build context.
-# Build with context at the solution root, e.g.:
-#   docker build -t safeboda-api -f SafeBoda.Api/Dockerfile .
-
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy csproj files and restore dependencies first (better layer caching)
+# Copy project files and restore dependencies (better layer caching)
 COPY SafeBoda.Core/SafeBoda.Core.csproj SafeBoda.Core/
 COPY SafeBoda.Application/SafeBoda.Application.csproj SafeBoda.Application/
 COPY SafeBoda.Infrastructure/SafeBoda.Infrastructure.csproj SafeBoda.Infrastructure/
@@ -14,15 +12,25 @@ COPY SafeBoda.Api/SafeBoda.Api.csproj SafeBoda.Api/
 
 RUN dotnet restore SafeBoda.Api/SafeBoda.Api.csproj
 
-# Copy the rest of the source code
+# Copy source code
 COPY SafeBoda.Core/ SafeBoda.Core/
 COPY SafeBoda.Application/ SafeBoda.Application/
 COPY SafeBoda.Infrastructure/ SafeBoda.Infrastructure/
 COPY SafeBoda.Api/ SafeBoda.Api/
 
-# Publish the API project
+# Build and publish
 WORKDIR /src/SafeBoda.Api
 RUN dotnet publish -c Release -o /app/out
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+
+EXPOSE 80
+
+COPY --from=build /app/out .
+
+ENTRYPOINT ["dotnet", "SafeBoda.Api.dll"]
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
