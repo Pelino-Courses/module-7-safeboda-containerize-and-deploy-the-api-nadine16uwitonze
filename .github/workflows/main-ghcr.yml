@@ -14,7 +14,7 @@ env:
   AZURE_RESOURCE_GROUP: safeboda-rg
   DOCKER_IMAGE_NAME: safeboda-api
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/safeboda-api
+  IMAGE_NAME: ${{ toLower(github.repository_owner) }}/safeboda-api
   DOTNET_VERSION: '8.0.x'
 
 jobs:
