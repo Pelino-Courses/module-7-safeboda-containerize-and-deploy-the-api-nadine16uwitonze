@@ -9,6 +9,13 @@ using SafeBoda.Application.Interfaces;
 using SafeBoda.Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Kestrel to listen on port 80 for Azure App Service
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(80);
+});
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -98,7 +105,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -115,7 +122,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-
+// Add health check endpoint
+app.MapGet("/api/health", () => new { status = "healthy", timestamp = DateTime.UtcNow });
 
 app.Run();
 public partial class Program { }

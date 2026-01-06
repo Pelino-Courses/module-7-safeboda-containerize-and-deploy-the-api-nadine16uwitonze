@@ -1,4 +1,4 @@
-﻿# Multi-stage Dockerfile for SafeBoda API (built for .NET 8)
+# Multi-stage Dockerfile for SafeBoda API (built for .NET 8)
 # Build from repository root: docker build -f SafeBoda.Api/Dockerfile -t safeboda-api .
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -23,17 +23,22 @@ WORKDIR /src/SafeBoda.Api
 RUN dotnet publish -c Release -o /app/out
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
+
+# Create data directory for SQLite and set permissions
+RUN mkdir -p /app/data && chmod 755 /app/data
+
+# Set environment variables
+ENV ASPNETCORE_URLS=http://+:80
+ENV ASPNETCORE_ENVIRONMENT=Production
 
 EXPOSE 80
 
 COPY --from=build /app/out .
+COPY SafeBoda.Api/startup.sh /app/startup.sh
 
-ENTRYPOINT ["dotnet", "SafeBoda.Api.dll"]
+# Make startup script executable
+RUN chmod +x /app/startup.sh
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
-WORKDIR /app
-COPY --from=build /app/out .
-
-ENTRYPOINT ["dotnet", "SafeBoda.Api.dll"]
+ENTRYPOINT ["/app/startup.sh"]
